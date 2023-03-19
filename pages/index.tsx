@@ -26,8 +26,12 @@ function Feature({ title, description, className, ...props }: FeatureProps) {
 }
 
 export default function Index() {
-
-  const { coords, isGeolocationEnabled } = useGeolocated({positionOptions: {enableHighAccuracy: false}, userDecisionTimeout: 5000});
+  const { coords, isGeolocationEnabled } = useGeolocated({
+    positionOptions: {
+      enableHighAccuracy: false,
+    },
+    userDecisionTimeout: 5000,
+  });
 
   return (
     <MarketingLayout>
