@@ -74,7 +74,10 @@ export default function Index() {
 
   useEffect(() => {
     if (coords){
-      Geocode.fromLatLng(coords.latitude, coords.longitude).then(
+      Geocode.fromLatLng(
+        coords.latitude.toString(),
+        coords.longitude.toString()
+      ).then(
         (response) => {
           const address = response.results[0].formatted_address;
           let city, state, country;
