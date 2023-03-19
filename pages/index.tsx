@@ -1,3 +1,4 @@
+import React, { useState, useCallback, useEffect } from "react";
 import clsx from "clsx";
 import { GetServerSideProps } from "next";
 import { ComponentProps, ReactNode } from "react";
@@ -10,6 +11,31 @@ import * as Server from "../lib/server";
 import { Button, LinkButton } from "../primitives/Button";
 import { Container } from "../primitives/Container";
 import styles from "./index.module.css";
+import { GoogleMap, useJsApiLoader } from "@react-google-maps/api";
+import Geocode from "react-geocode";
+
+Geocode.setApiKey("AIzaSyChTOZ525vKb1CUQYyB7VWPzZxXjSDLyGg");
+Geocode.setLanguage("en");
+// set response region. Its optional.
+// A Geocoding request with region=es (Spain) will return the Spanish city.
+Geocode.setRegion("es");
+// set location_type filter . Its optional.
+// google geocoder returns more that one address for given lat/lng.
+// In some case we need one address as response for which google itself provides a location_type filter.
+// So we can easily parse the result for fetching address components
+// ROOFTOP, RANGE_INTERPOLATED, GEOMETRIC_CENTER, APPROXIMATE are the accepted values.
+// And according to the below google docs in description, ROOFTOP param returns the most accurate result.
+Geocode.setLocationType("ROOFTOP");
+
+const containerStyle = {
+  width: "100%",
+  height: "400px",
+};
+
+const center = {
+  lat: -3.745,
+  lng: -38.523,
+};
 
 interface FeatureProps extends Omit<ComponentProps<"div">, "title"> {
   description: ReactNode;
@@ -33,13 +59,80 @@ export default function Index() {
     userDecisionTimeout: 5000,
   });
 
+  const { isLoaded } = useJsApiLoader({
+    id: "google-map-script",
+    googleMapsApiKey: "AIzaSyChTOZ525vKb1CUQYyB7VWPzZxXjSDLyGg",
+  });
+
+  const [map, setMap] = useState(null);
+  const [location, setLocation] = useState({
+    address: null,
+    city: null,
+    state: null,
+    country: null,
+  });
+
+  useEffect(() => {
+    if (coords){
+      Geocode.fromLatLng(coords.latitude, coords.longitude).then(
+        (response) => {
+          const address = response.results[0].formatted_address;
+          let city, state, country;
+          for (
+            let i = 0;
+            i < response.results[0].address_components.length;
+            i++
+          ) {
+            for (
+              let j = 0;
+              j < response.results[0].address_components[i].types.length;
+              j++
+            ) {
+              switch (response.results[0].address_components[i].types[j]) {
+                case "locality":
+                  city = response.results[0].address_components[i].long_name;
+                  break;
+                case "administrative_area_level_1":
+                  state = response.results[0].address_components[i].long_name;
+                  break;
+                case "country":
+                  country = response.results[0].address_components[i].long_name;
+                  break;
+              }
+            }
+          }
+          setLocation({
+            address: address,
+            city: city,
+            state: state,
+            country: country,
+          });
+        },
+        (error) => {
+          console.error(error);
+        }
+      );
+    }
+    return;
+  }, [coords, isLoaded]);
+
+  const onLoad = useCallback(function callback(map) {
+    // This is just an example of getting and using the map instance!!! don't just blindly copy!
+    const bounds = new window.google.maps.LatLngBounds(center);
+    map.fitBounds(bounds);
+    console.log(map);
+    setMap(map);
+  }, []);
+
+  const onUnmount = useCallback(function callback() {
+    setMap(null);
+  }, []);
   return (
     <MarketingLayout>
       <Container className={styles.section}>
         <div className={styles.heroInfo}>
-          {JSON.stringify(coords)}:::
           <h1 className={styles.heroTitle}>
-            Kickstart your Garden Club {JSON.stringify(isGeolocationEnabled)}
+            Kickstart the {location.city ? location.city : "Local"} Garden Club
           </h1>
           <p className={styles.heroLead}>
             Use the Starter Kit to build your Garden Club app in minutes.
@@ -58,6 +151,7 @@ export default function Index() {
           </LinkButton>
         </div>
       </Container>
+
       <Container className={styles.section}>
         <h2 className={styles.sectionTitle}>Features</h2>
         <div className={styles.featuresGrid}>
@@ -116,6 +210,22 @@ export default function Index() {
           />
         </div>
       </Container>
+
+      {coords?.latitude ? (
+        <GoogleMap
+          mapContainerStyle={containerStyle}
+          center={{
+            lat: coords?.latitude,
+            lng: coords?.longitude,
+          }}
+          zoom={13}
+          onUnmount={onUnmount}
+        >
+          <></>
+        </GoogleMap>
+      ) : (
+        ``
+      )}
     </MarketingLayout>
   );
 }
