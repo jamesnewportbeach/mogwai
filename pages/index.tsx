@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import { GetServerSideProps } from "next";
 import { ComponentProps, ReactNode } from "react";
+import { useGeolocated } from "react-geolocated";
 import { DASHBOARD_URL } from "../constants";
 import { SignInIcon } from "../icons";
 import { MarketingLayout } from "../layouts/Marketing";
@@ -25,16 +26,19 @@ function Feature({ title, description, className, ...props }: FeatureProps) {
 }
 
 export default function Index() {
+
+  const { coords, isGeolocationEnabled } = useGeolocated({positionOptions: {enableHighAccuracy: false}, userDecisionTimeout: 5000});
+
   return (
     <MarketingLayout>
       <Container className={styles.section}>
         <div className={styles.heroInfo}>
+          {JSON.stringify(coords)}:::
           <h1 className={styles.heroTitle}>
-            Kickstart your collaborative&nbsp;app
+            Kickstart your Garden&nbsp;Club {JSON.stringify(isGeolocationEnabled)}
           </h1>
           <p className={styles.heroLead}>
-            Use the Liveblocks Starter Kit to build your document-based
-            collaborative app in&nbsp;minutes.
+            Use the Starter Kit to build your document-based collaborative Garden Club app in&nbsp;minutes.
           </p>
         </div>
         <div className={styles.heroActions}>
