@@ -73,7 +73,7 @@ export default function Index() {
   });
 
   useEffect(() => {
-    if (coords){
+    if (coords) {
       Geocode.fromLatLng(
         coords.latitude.toString(),
         coords.longitude.toString()
