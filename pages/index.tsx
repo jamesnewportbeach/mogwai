@@ -39,10 +39,10 @@ export default function Index() {
         <div className={styles.heroInfo}>
           {JSON.stringify(coords)}:::
           <h1 className={styles.heroTitle}>
-            Kickstart your Garden&nbsp;Club {JSON.stringify(isGeolocationEnabled)}
+            Kickstart your Garden Club {JSON.stringify(isGeolocationEnabled)}
           </h1>
           <p className={styles.heroLead}>
-            Use the Starter Kit to build your document-based collaborative Garden Club app in&nbsp;minutes.
+            Use the Starter Kit to build your Garden Club app in minutes.
           </p>
         </div>
         <div className={styles.heroActions}>
